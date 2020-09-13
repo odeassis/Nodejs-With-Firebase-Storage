@@ -2,14 +2,11 @@ const express = require('express');
 const multer = require('multer');
 const routes = express.Router();
 
-const uploadImage = require('../firebase/index');
+const multerConfig = require('../config/multer');
 
-const Multer = multer({
-  storage: multer.memoryStorage(),
-  limits: 1024 * 1024,
-});
+const uploadFile = require('../firebase/index');
 
-routes.post('/upload', Multer.single('imagem'), uploadImage, (req, res) =>{
+routes.post('/upload', multer(multerConfig).single('file'), uploadFile, (req, res) =>{
   
   return console.log(req.file);
 

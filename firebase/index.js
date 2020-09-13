@@ -1,29 +1,42 @@
+require('dotenv').config();
 var admin = require("firebase-admin");
+const crypto = require('crypto');
 
-var serviceAccount = require('../config/keyFile.json');
+var serviceAccount = require('../config/serviceAccount.json');
 
-const BUCKET = "integrating-with-react.appspot.com";
+// BUCKET do storage - somente o endereco
+const BUCKET = process.env.BUCKET_URL;
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   storageBucket: BUCKET,
 });
 
+// Intancia do BUCKET 
 const bucket = admin.storage().bucket();
 
-const uploadImage = (req, res, next) => {
+const uploadFile = (req, res, next) => {
 
+  // Verifica se esta sendo enviado um arquivo
   if(!req.file) return next();
 
-  const imagem = req.file;
+  const file = req.file;
 
-  const imagemName = Date.now() + "." + imagem.originalname.split('.').pop();
+  //Muldar o nome do arquivo com um has
+  const filename = `${Math.floor(Math.random() * 65536)
+                  }-${crypto
+                      .createHash('sha256')
+                      .update(file.originalname)
+                      .digest('hex').toString()
+                  }-${file.originalname}`
 
-  const file = bucket.file(imagemName);
+  //Criando um aquivo no bucket
+  const file_in_bucket = bucket.file(filename);
 
-  const stream = file.createWriteStream({
+  // Enviando o arquivo para o bucket
+  const stream = file_in_bucket.createWriteStream({
     metadata: {
-      contentType: imagem.mimetype,
+      contentType: file.mimetype,
     },
   });
 
@@ -33,16 +46,15 @@ const uploadImage = (req, res, next) => {
 
   stream.on("finish", async () => {
     // Tornar o arquivo publico
-    await file.makePublic();
+    await file_in_bucket.makePublic();
 
     //Obter a url publica
-    req.file.firebaseUrl = `https://storage.googleapis.com/${BUCKET}/${imagemName}`;
+    req.file.firebaseUrl = `https://storage.googleapis.com/${BUCKET}/${filename}`;
 
     next();
   });
 
-  stream.end(imagem.buffer)
-  
+  stream.end(file.buffer);
 }
 
-module.exports = uploadImage;
+module.exports = uploadFile;
