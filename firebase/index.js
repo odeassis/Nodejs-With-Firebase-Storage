@@ -22,7 +22,7 @@ const uploadFile = (req, res, next) => {
 
   const file = req.file;
 
-  //Muldar o nome do arquivo com um has
+  //Muldar o nome do arquivo
   const filename = `${Math.floor(Math.random() * 65536)
                   }-${crypto
                       .createHash('sha256')
