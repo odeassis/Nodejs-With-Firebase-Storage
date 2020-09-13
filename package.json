@@ -1,0 +1,15 @@
+{
+  "name": "Firebase_Storage_NodeJS",
+  "version": "1.0.0",
+  "main": "./server.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "nodemon ./server.js"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "firebase-admin": "^9.1.1",
+    "multer": "^1.4.2",
+    "nodemon": "^2.0.4"
+  }
+}
